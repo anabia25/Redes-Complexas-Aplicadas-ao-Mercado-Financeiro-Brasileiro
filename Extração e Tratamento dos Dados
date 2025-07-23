@@ -1,0 +1,174 @@
+import pandas as pd
+from google.colab import drive
+drive.mount('/content/drive')
+
+# Parâmetros comuns
+tamanho_campos = [2,8,2,12,3,12,10,3,4,13,13,13,13,13,13,13,5,18,18,13,1,8,7,13,12,3]
+colunas = [
+    "tipo_registro", "data_pregao", "cod_bdi", "cod_negociacao", "tipo_mercado", "noma_empresa",
+    "especificacao_papel", "prazo_dias_merc_termo", "moeda_referencia", "preco_abertura",
+    "preco_maximo", "preco_minimo", "preco_medio", "preco_ultimo_negocio",
+    "preco_melhor_oferta_compra", "preco_melhor_oferta_venda", "numero_negocios",
+    "quantidade_papeis_negociados", "volume_total_negociado", "preco_exercicio",
+    "ìndicador_correcao_precos", "data_vencimento", "fator_cotacao", "preco_exercicio_pontos",
+    "codigo_isin", "num_distribuicao_papel"
+]
+colunas_valores = [
+    "preco_abertura", "preco_maximo", "preco_minimo", "preco_medio", "preco_ultimo_negocio",
+    "preco_melhor_oferta_compra", "preco_melhor_oferta_venda", "volume_total_negociado",
+    "preco_exercicio", "preco_exercicio_pontos"
+]
+colunas_remover = [
+    'tipo_registro', 'tipo_mercado', 'prazo_dias_merc_termo', 'moeda_referencia',
+    'preco_exercicio', 'ìndicador_correcao_precos', 'data_vencimento',
+    'fator_cotacao', 'preco_exercicio_pontos', 'num_distribuicao_papel'
+]
+codigos_relevantes = [2, 5, 6]
+
+# Função para carregar e tratar os dados
+def carregar_dados(arquivo):
+    df = pd.read_fwf(arquivo, widths=tamanho_campos, header=0)
+    df.columns = colunas
+    df = df.drop(df.index[-1])  # Remove última linha
+    for col in colunas_valores:
+        df[col] = df[col] / 100.0
+    df = df[df['cod_bdi'].isin(codigos_relevantes)]
+    df = df.drop(columns=colunas_remover)
+    df['data_pregao'] = pd.to_datetime(df['data_pregao'], format='%Y%m%d')
+    df['data_pregao_formatada'] = df['data_pregao'].dt.strftime('%d/%m/%Y')
+    return df
+
+# Carregar dado de 2024
+ano = 2024
+caminho_arquivo = f'/content/drive/MyDrive/dados_tcc/COTAHIST_A{ano}.TXT'
+df_2024 = carregar_dados(caminho_arquivo)
+
+print(df_2024.info())
+print(f"Primeira data: {df_2024['data_pregao'].min().strftime('%d/%m/%Y')}")
+print(f"Última data: {df_2024['data_pregao'].max().strftime('%d/%m/%Y')}")
+
+#DADOS JANEIRO
+
+# Filtrar apenas os dados de janeiro de 2024
+df_janeiro_2024 = df_2024[df_2024['data_pregao'].dt.month == 1]
+
+# Verificar o resultado
+print(df_janeiro_2024.info())
+print(df_janeiro_2024['data_pregao'].unique())
+
+
+# Criar função para identificar papéis válidos
+def papel_valido(espec):
+    # Mantém papéis que são ON ou PN sem sufixo "ED", "EJ", "REC", etc.
+    return (
+        espec.startswith(('ON', 'PN')) and
+        all(x not in espec for x in ['ED', 'EJ', 'REC', 'UNT', 'ES', 'PNAO', 'R', 'BONUS', 'SUBS'])
+    )
+
+# Aplicar o filtro
+df_limpo = df_janeiro_2024[df_janeiro_2024['especificacao_papel'].apply(papel_valido)]
+
+# Verificar resultado
+print(df_limpo['especificacao_papel'].unique())
+
+# Número de registros depois da filtragem
+total_depois = len(df_limpo)
+
+
+# Lista ordenada de todos os ativos únicos
+ativos_unicos = sorted(df_limpo['cod_negociacao'].unique())
+
+print(f"Quantidade de ativos únicos: {len(ativos_unicos)}")
+print("Lista de ativos:")
+for ativo in ativos_unicos:
+    print(ativo)
+
+
+for i, ativo in enumerate(ativos_unicos):
+    print(f"{i+1}: {ativo}")
+
+
+import yfinance as yf
+import pandas as pd
+
+# 1. Extrair lista de ativos do DataFrame limpo
+ativos = df_limpo['cod_negociacao'].unique()
+tickers_yahoo = [ticker + '.SA' for ticker in ativos]
+
+# 2. Baixar dados ajustados do Yahoo Finance
+# Certifique-se de limitar o período para não sobrecarregar
+dados = yf.download(
+    tickers=tickers_yahoo,
+    start='2024-01-01',
+    end='2024-01-31',
+    auto_adjust=True,
+    threads=True,
+    group_by='ticker'
+)
+
+# 3. Organizar os dados em um único DataFrame
+# Retirando apenas o 'Close' ajustado
+fechamentos = pd.DataFrame()
+
+for ticker in tickers_yahoo:
+    try:
+        serie = dados[ticker]['Close']
+        fechamentos[ticker.replace('.SA', '')] = serie
+    except KeyError:
+        print(f"{ticker} não disponível no Yahoo.")
+
+
+#DADOS FEVEREIRO
+
+# Filtrar apenas os dados de fevereiro de 2024
+df_fevereiro_2024 = df_2024[df_2024['data_pregao'].dt.month == 2]
+
+# Função para verificar se o papel é válido (mesma usada em janeiro)
+def papel_valido(espec):
+    return (
+        espec.startswith(('ON', 'PN')) and
+        all(x not in espec for x in ['ED', 'EJ', 'REC', 'UNT', 'ES', 'PNAO', 'R', 'BONUS', 'SUBS'])
+    )
+
+# Aplicar filtro de papéis válidos
+df_fev_limpo = df_fevereiro_2024[df_fevereiro_2024['especificacao_papel'].apply(papel_valido)]
+
+# Verificar resultado
+print(df_fev_limpo['especificacao_papel'].unique())
+print(f"Número de registros após filtro: {len(df_fev_limpo)}")
+
+# Lista ordenada de todos os ativos únicos
+ativos_unicos = sorted(df_fev_limpo['cod_negociacao'].unique())
+
+print(f"Quantidade de ativos únicos: {len(ativos_unicos)}")
+print("Lista de ativos:")
+for ativo in ativos_unicos:
+    print(ativo)
+
+
+import yfinance as yf
+import pandas as pd
+
+# Extrair tickers válidos e formatar para Yahoo Finance
+ativos_fev = df_fev_limpo['cod_negociacao'].unique()
+tickers_yahoo_fev = [ticker + '.SA' for ticker in ativos_fev]
+
+# Baixar dados de fechamento ajustado para fevereiro de 2024
+dados_fev = yf.download(
+    tickers=tickers_yahoo_fev,
+    start='2024-02-01',
+    end='2024-02-29',
+    auto_adjust=True,
+    threads=True,
+    group_by='ticker'
+)
+
+# Organizar os dados em um DataFrame
+fechamentos_fev = pd.DataFrame()
+
+for ticker in tickers_yahoo_fev:
+    try:
+        serie = dados_fev[ticker]['Close']
+        fechamentos_fev[ticker.replace('.SA', '')] = serie
+    except KeyError:
+        print(f"{ticker} não disponível no Yahoo.")
