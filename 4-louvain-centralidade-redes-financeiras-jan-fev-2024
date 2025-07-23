@@ -1,0 +1,246 @@
+!pip uninstall -y community
+!pip install python-louvain
+import community.community_louvain as community_louvain
+partition = community_louvain.best_partition(G, random_state=42)
+
+#JANEIRO
+# Aplicar Louvain
+particao = community_louvain.best_partition(G, weight='weight', random_state=42)
+
+# Adicionar informação de comunidade
+comunidades_df = pd.DataFrame({
+    'Ativo': list(particao.keys()),
+    'Comunidade': list(particao.values())
+})
+
+# Visualizar número de comunidades
+n_comunidades = len(set(particao.values()))
+print(f"Número de comunidades detectadas: {n_comunidades}")
+
+# Tamanho das comunidades
+tamanhos = comunidades_df['Comunidade'].value_counts()
+print("\nTop 5 maiores comunidades:")
+print(tamanhos.head())
+
+# Visualização (opcional)
+plt.figure(figsize=(12, 8))
+pos = nx.spring_layout(G, seed=42)
+cores = [particao[n] for n in G.nodes()]
+nx.draw_networkx_nodes(G, pos, node_color=cores, cmap=cm.Set3, node_size=30)
+nx.draw_networkx_edges(G, pos, alpha=0.2)
+plt.title("Comunidades detectadas - Louvain")
+plt.axis('off')
+plt.show()
+
+centralidade_df = pd.DataFrame(index=G.nodes())
+
+# Grau
+centralidade_df['Grau'] = pd.Series(nx.degree_centrality(G))
+
+# Intermediação
+centralidade_df['Betweenness'] = pd.Series(nx.betweenness_centrality(G, weight='weight'))
+
+# Autovetor
+centralidade_df['Eigenvector'] = pd.Series(nx.eigenvector_centrality(G, weight='weight', max_iter=500))
+
+# Comunidade
+centralidade_df['Comunidade'] = centralidade_df.index.map(particao)
+centralidade_df = centralidade_df.reset_index().rename(columns={'index': 'Ativo'})
+centralidade_df.head()
+
+# Top 10 por Grau
+top_grau = centralidade_df.sort_values(by='Grau', ascending=False).head(10)
+print("Top 10 ativos por Grau:")
+print(top_grau[['Ativo', 'Grau', 'Comunidade']])
+
+# Top 10 por Betweenness
+top_betw = centralidade_df.sort_values(by='Betweenness', ascending=False).head(10)
+print("\nTop 10 ativos por Betweenness:")
+print(top_betw[['Ativo', 'Betweenness', 'Comunidade']])
+
+# Top 10 por Autovetor
+top_auto = centralidade_df.sort_values(by='Eigenvector', ascending=False).head(10)
+print("\nTop 10 ativos por Autovetor:")
+print(top_auto[['Ativo', 'Eigenvector', 'Comunidade']])
+
+# Top 10 por Closeness (Proximidade)
+top_closeness = centralidade_df.sort_values(by='Closeness', ascending=False).head(10)
+print("\nTop 10 ativos por Closeness:")
+print(top_closeness[['Ativo', 'Closeness', 'Comunidade']])
+
+#FEVEREIRO
+import community.community_louvain as community_louvain
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+
+# Aplicar Louvain para fevereiro
+particao_fev = community_louvain.best_partition(G_fev, weight='weight', random_state=42)
+
+# DataFrame com comunidades
+comunidades_fev_df = pd.DataFrame({
+    'Ativo': list(particao_fev.keys()),
+    'Comunidade': list(particao_fev.values())
+})
+
+# Número de comunidades
+n_comunidades_fev = len(set(particao_fev.values()))
+print(f"Número de comunidades detectadas em fevereiro: {n_comunidades_fev}")
+
+# Tamanho das comunidades
+tamanhos_fev = comunidades_fev_df['Comunidade'].value_counts()
+print("\nTop 5 maiores comunidades:")
+print(tamanhos_fev.head())
+
+# Visualização da rede de fevereiro
+plt.figure(figsize=(12, 8))
+pos_fev = nx.spring_layout(G_fev, seed=42)
+cores_fev = [particao_fev[n] for n in G_fev.nodes()]
+nx.draw_networkx_nodes(G_fev, pos_fev, node_color=cores_fev, cmap=cm.Set3, node_size=30)
+nx.draw_networkx_edges(G_fev, pos_fev, alpha=0.2)
+plt.title("")
+plt.axis('off')
+plt.show()
+
+
+# Criar DataFrame com os nós da rede de fevereiro
+centralidade_fev_df = pd.DataFrame(index=G_fev.nodes())
+
+# Grau
+centralidade_fev_df['Grau'] = pd.Series(nx.degree_centrality(G_fev))
+
+# Intermediação (Betweenness)
+centralidade_fev_df['Betweenness'] = pd.Series(nx.betweenness_centrality(G_fev, weight='weight'))
+
+# Centralidade por autovetor
+centralidade_fev_df['Eigenvector'] = pd.Series(nx.eigenvector_centrality(G_fev, weight='weight', max_iter=500))
+
+#proximidade
+centralidade_fev_df['Closeness'] = pd.Series(nx.closeness_centrality(G_fev))
+
+# Comunidade
+centralidade_fev_df['Comunidade'] = centralidade_fev_df.index.map(particao_fev)
+
+# Resetar índice para ter a coluna 'Ativo'
+centralidade_fev_df = centralidade_fev_df.reset_index().rename(columns={'index': 'Ativo'})
+# Visualizar
+centralidade_fev_df.head()
+
+# Top 10 por Grau
+top_grau_fev = centralidade_fev_df.sort_values(by='Grau', ascending=False).head(10)
+print("Top 10 ativos por Grau:")
+print(top_grau_fev[['Ativo', 'Grau', 'Comunidade']])
+
+# Top 10 por Betweenness
+top_betw_fev = centralidade_fev_df.sort_values(by='Betweenness', ascending=False).head(10)
+print("\nTop 10 ativos por Betweenness:")
+print(top_betw_fev[['Ativo', 'Betweenness', 'Comunidade']])
+
+# Top 10 por Autovetor
+top_auto_fev = centralidade_fev_df.sort_values(by='Eigenvector', ascending=False).head(10)
+print("\nTop 10 ativos por Autovetor:")
+print(top_auto_fev[['Ativo', 'Eigenvector', 'Comunidade']])
+
+# Top 10 por Closeness (Proximidade)
+top_closeness_fev = centralidade_fev_df.sort_values(by='Closeness', ascending=False).head(10)
+print("\nTop 10 ativos por Closeness:")
+print(top_closeness_fev[['Ativo', 'Closeness', 'Comunidade']])
+
+#Modolação - fev 100X
+
+mport networkx as nx
+import community.community_louvain as community_louvain
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+
+
+# Fixar a aleatoriedade global
+random.seed(42)
+np.random.seed(42)
+
+# Executar Louvain múltiplas vezes
+n_iter = 100
+modularidades = []
+num_comunidades = []
+
+for i in range(n_iter):
+    particao = community_louvain.best_partition(G_fev, weight='weight')  # sem random_state para capturar variabilidade
+    mod = community_louvain.modularity(particao, G_fev, weight='weight')
+    modularidades.append(mod)
+    num_comunidades.append(len(set(particao.values())))
+
+# Criar DataFrame
+resultados = pd.DataFrame({
+    'Execução': np.arange(1, n_iter + 1),
+    'Modularidade': modularidades,
+    'Número de Comunidades': num_comunidades
+})
+
+# Mostrar estatísticas
+print(resultados.describe())
+
+# Plotar resultados
+plt.figure(figsize=(10, 5))
+plt.plot(resultados['Execução'], resultados['Modularidade'], marker='o', label='Modularidade')
+plt.plot(resultados['Execução'], resultados['Número de Comunidades'], marker='s', label='Número de Comunidades')
+plt.title('')
+plt.xlabel('Execução')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+import community.community_louvain as community_louvain
+import networkx as nx
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from collections import Counter
+
+# Definir número de execuções
+n_execucoes = 100
+
+# Armazenar número de comunidades e tamanhos das maiores
+num_comunidades_fev = []
+top_comunidades_lista_fev = []
+
+for i in range(n_execucoes):
+    particao_fev = community_louvain.best_partition(G_fev, weight='weight')
+    comunidades_df_fev = pd.DataFrame({
+        'Ativo': list(particao_fev.keys()),
+        'Comunidade': list(particao_fev.values())
+    })
+
+    tamanhos_fev = comunidades_df_fev['Comunidade'].value_counts()
+    num_comunidades_fev.append(len(tamanhos_fev))
+    top_comunidades_lista_fev.append(tamanhos_fev.head(5).to_dict())  # salvar top 5
+
+# Média do número de comunidades
+media_comunidades_fev = np.mean(num_comunidades_fev)
+print(f"Média do número de comunidades detectadas: {media_comunidades_fev:.2f}")
+
+# Calcular média dos tamanhos das top 5 comunidades (por rótulo)
+todas_comunidades_fev = Counter()
+ocorrencias_fev = Counter()
+
+for top in top_comunidades_lista_fev:
+    for com, tam in top.items():
+        todas_comunidades_fev[com] += tam
+        ocorrencias_fev[com] += 1
+
+print("\nMédia dos tamanhos das top 5 maiores comunidades:")
+for com, soma in todas_comunidades_fev.most_common(5):
+    media_tam = soma / ocorrencias_fev[com]
+    print(f"Comunidade {com}: média de {media_tam:.1f} ativos")
+
+# (Opcional) Visualizar a última partição gerada
+plt.figure(figsize=(12, 8))
+pos = nx.spring_layout(G_fev, seed=42)
+cores = [particao_fev[n] for n in G_fev.nodes()]
+nx.draw_networkx_nodes(G_fev, pos, node_color=cores, cmap=cm.Set3, node_size=30)
+nx.draw_networkx_edges(G_fev, pos, alpha=0.2)
+plt.title("")
+plt.axis('off')
+plt.show()
