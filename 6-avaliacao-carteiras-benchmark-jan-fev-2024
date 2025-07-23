@@ -1,0 +1,182 @@
+#JANEIRO
+import yfinance as yf
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Índices/ETFs para comparação plausível
+indices = {
+    'IBOV': '^BVSP',
+    'Small Caps': 'SMAL11.SA',
+    'Dividendos': 'DIVO11.SA'
+}
+
+# Período de análise
+start = "2024-01-01"
+end = "2024-02-01"
+
+# Taxa livre de risco mensal (ex: CDI de 13% ao ano)
+taxa_livre_risco_mensal = 0.13 / 12
+
+# Dicionário para armazenar dados
+dados_indices = {}
+
+for nome, ticker in indices.items():
+    dados = yf.download(ticker, start=start, end=end)
+    if not dados.empty:
+        dados['Preço Normalizado'] = 100 * dados['Close'] / dados['Close'].iloc[0]
+        dados_indices[nome] = dados
+    else:
+        print(f"Dados indisponíveis para {nome} ({ticker})")
+
+# Calcular retornos, volatilidades e Sharpe dos índices
+for nome, dados in dados_indices.items():
+    retornos = dados['Preço Normalizado'].pct_change().dropna()
+    retorno_total = dados['Preço Normalizado'].iloc[-1] / dados['Preço Normalizado'].iloc[0] - 1
+    volatilidade = retornos.std() * (252 ** 0.5)
+    sharpe = (retornos.mean() - taxa_livre_risco_mensal) / retornos.std()
+
+    print(f"{nome}:")
+    print(f"  Retorno: {retorno_total:.2%}")
+    print(f"  Volatilidade: {volatilidade:.2%}")
+    print(f"  Índice de Sharpe: {sharpe:.2f}")
+    print("-" * 40)
+
+# Calcular também para a Carteira Experimental
+retornos_carteira = precos_normalizados['Carteira'].pct_change().dropna()
+retorno_total_carteira = precos_normalizados['Carteira'].iloc[-1] / precos_normalizados['Carteira'].iloc[0] - 1
+volatilidade_carteira = retornos_carteira.std() * (252 ** 0.5)
+sharpe_carteira = (retornos_carteira.mean() - taxa_livre_risco_mensal) / retornos_carteira.std()
+
+print("Carteira Experimental:")
+print(f"  Retorno: {retorno_total_carteira:.2%}")
+print(f"  Volatilidade: {volatilidade_carteira:.2%}")
+print(f"  Índice de Sharpe: {sharpe_carteira:.2f}") 
+
+import yfinance as yf
+import matplotlib.pyplot as plt
+
+# Índices/ETFs para comparação plausível
+indices = {
+    'IBOV': '^BVSP',
+    'Small Caps': 'SMAL11.SA',
+    'Dividendos': 'DIVO11.SA'
+}
+
+# Período de análise
+start = "2024-01-01"
+end = "2024-02-01"
+
+plt.figure(figsize=(12, 6))
+
+for nome, ticker in indices.items():
+    dados = yf.download(ticker, start=start, end=end)
+    if not dados.empty:
+        dados['Preço Normalizado'] = 100 * dados['Close'] / dados['Close'].iloc[0]
+        plt.plot(dados.index, dados['Preço Normalizado'], label=nome, linewidth=2)
+    else:
+        print(f"Dados indisponíveis para {nome} ({ticker})")
+
+# Carteira experimental
+plt.plot(precos_normalizados.index, precos_normalizados['Carteira'],
+         label='Carteira Experimental', linewidth=2, linestyle='--')
+
+plt.title("")
+plt.xlabel("Data")
+plt.ylabel("Preço Normalizado (base 100)")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+#FEVEREIRO
+
+import yfinance as yf
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Índices/ETFs para comparação
+indices = {
+    'IBOV': '^BVSP',
+    'Small Caps': 'SMAL11.SA',
+    'Dividendos': 'DIVO11.SA'
+}
+
+# Período de análise de fevereiro
+start = "2024-02-01"
+end = "2024-03-01"
+
+# Taxa livre de risco mensal (ex: CDI de 13% ao ano)
+taxa_livre_risco_mensal = 0.13 / 12
+
+
+# Dicionário para armazenar dados
+dados_indices = {}
+
+for nome, ticker in indices.items():
+    dados = yf.download(ticker, start=start, end=end)
+    if not dados.empty:
+        dados['Preço Normalizado'] = 100 * dados['Close'] / dados['Close'].iloc[0]
+        dados_indices[nome] = dados
+    else:
+        print(f"Dados indisponíveis para {nome} ({ticker})")
+
+# Calcular retornos, volatilidades e Sharpe dos índices
+for nome, dados in dados_indices.items():
+    retornos = dados['Preço Normalizado'].pct_change().dropna()
+    retorno_total = dados['Preço Normalizado'].iloc[-1] / dados['Preço Normalizado'].iloc[0] - 1
+    volatilidade = retornos.std() * (252 ** 0.5)
+    sharpe = (retornos.mean() - taxa_livre_risco_mensal) / retornos.std()
+
+    print(f"{nome}:")
+    print(f"  Retorno: {retorno_total:.2%}")
+    print(f"  Volatilidade: {volatilidade:.2%}")
+    print(f"  Índice de Sharpe: {sharpe:.2f}")
+    print("-" * 40)
+
+# Calcular também para a Carteira Experimental
+retornos_carteira_fev = precos_normalizados_fev['Carteira'].pct_change().dropna()
+retorno_total_carteira_fev = precos_normalizados_fev['Carteira'].iloc[-1] / precos_normalizados_fev['Carteira'].iloc[0] - 1
+volatilidade_carteira_fev = retornos_carteira_fev.std() * (252 ** 0.5)
+sharpe_carteira_fev = (retornos_carteira_fev.mean() - taxa_livre_risco_mensal) / retornos_carteira_fev.std()
+
+print("Carteira Experimental:")
+print(f"  Retorno: {retorno_total_carteira_fev:.2%}")
+print(f"  Volatilidade: {volatilidade_carteira_fev:.2%}")
+print(f"  Índice de Sharpe: {sharpe_carteira_fev:.2f}")
+
+import yfinance as yf
+import matplotlib.pyplot as plt
+
+# Índices/ETFs para comparação
+indices = {
+    'IBOV': '^BVSP',
+    'Small Caps': 'SMAL11.SA',
+    'Dividendos': 'DIVO11.SA'
+}
+
+# Período de análise para fevereiro
+start = "2024-02-01"
+end = "2024-02-29"
+
+plt.figure(figsize=(12, 6))
+
+for nome, ticker in indices.items():
+    dados = yf.download(ticker, start=start, end=end)
+    if not dados.empty:
+        dados['Preço Normalizado'] = 100 * dados['Close'] / dados['Close'].iloc[0]
+        plt.plot(dados.index, dados['Preço Normalizado'], label=nome, linewidth=2)
+    else:
+        print(f"Dados indisponíveis para {nome} ({ticker})")
+
+# Carteira experimental de fevereiro
+plt.plot(precos_normalizados_fev.index, precos_normalizados_fev['Carteira'],
+         label='Carteira Experimental', linewidth=2.5, linestyle='--', color='red')
+
+plt.title("")
+plt.xlabel("Data")
+plt.ylabel("Preço Normalizado (base 100)")
+plt.legend()
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.tight_layout()
+plt.show()
+
