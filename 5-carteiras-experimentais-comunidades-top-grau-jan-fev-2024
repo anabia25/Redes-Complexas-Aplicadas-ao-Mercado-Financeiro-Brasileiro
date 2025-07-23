@@ -1,0 +1,149 @@
+#JANEIRO
+#Selecionar os 2 mais centrais por comunidade
+# 1. Criar DataFrame com grau e comunidade
+import pandas as pd
+import networkx as nx
+
+# Calcular grau de cada ativo
+graus = dict(G.degree(weight='weight'))
+centralidade_df = pd.DataFrame({
+    'Ativo': list(graus.keys()),
+    'Grau': list(graus.values())
+})
+
+# Adicionar comunidade ao DataFrame
+centralidade_df['Comunidade'] = centralidade_df['Ativo'].map(particao)
+
+# 2. Identificar as 5 maiores comunidades
+top5_comunidades = centralidade_df['Comunidade'].value_counts().head(5).index
+
+# 3. Selecionar os 2 ativos mais centrais de cada comunidade
+carteira_exp = []
+
+for comunidade in top5_comunidades:
+    subgrupo = centralidade_df[centralidade_df['Comunidade'] == comunidade]
+    top2 = subgrupo.sort_values(by='Grau', ascending=False).head(2)
+    carteira_exp.extend(top2['Ativo'].tolist())
+
+# 4. Verificar resultado
+print("Carteira Experimental (2 ativos por comunidade):")
+print(carteira_exp)
+
+ativos_escolhidos = ['ALOS3.SA', 'IRBR3.SA', 'AHEB5.SA', 'ABCB4.SA', 'MOAR3.SA', 'LPSB3.SA', 'ALUP4.SA', 'ENGI4.SA', 'CLSC3.SA', 'PDGR3.SA']
+
+# Filtrar apenas os ativos da carteira
+precos_carteira = fechamento_ajustado[ativos_escolhidos].loc['2024-01-01':'2024-01-31']
+
+# Normalizar os preços (base 100 no início)
+precos_normalizados = precos_carteira / precos_carteira.iloc[0] * 100
+
+# Criar a série da carteira como a média dos ativos
+precos_normalizados['Carteira'] = precos_normalizados.mean(axis=1)
+
+# 5. Criar a tabela final com os ativos escolhidos
+tabela_resultado = centralidade_df[centralidade_df['Ativo'].isin(carteira_exp)].sort_values(by='Comunidade')
+
+# 6. Exibir resultado
+print("Tabela com os 10 ativos escolhidos (2 por comunidade):")
+print(tabela_resultado)
+
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(12, 6))
+
+# Plotar cada ativo individualmente (com transparência)
+for ativo in precos_normalizados.columns[:-1]:
+    plt.plot(precos_normalizados.index, precos_normalizados[ativo], label=ativo, alpha=0.3)
+
+# Plotar a Carteira Experimental em vermelho com linha tracejada
+plt.plot(precos_normalizados.index,
+         precos_normalizados['Carteira'],
+         label='Carteira Experimental',
+         linewidth=2.5,
+         linestyle='--',
+         color='red')
+
+# Personalização
+plt.title('')
+plt.xlabel('Data')
+plt.ylabel('Preço Normalizado (base 100)')
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.legend(loc='upper left', fontsize=9)
+plt.tight_layout()
+plt.show() 
+
+
+#FEVEREIRO
+#Selecionar os 2 mais centrais por comunidade
+import pandas as pd
+import networkx as nx
+
+# 1. Calcular grau dos ativos da rede de fevereiro
+graus_fev = dict(G_fev.degree(weight='weight'))
+centralidade_fev_df = pd.DataFrame({
+    'Ativo': list(graus_fev.keys()),
+    'Grau': list(graus_fev.values())
+})
+
+# 2. Adicionar a comunidade detectada
+centralidade_fev_df['Comunidade'] = centralidade_fev_df['Ativo'].map(particao_fev)
+
+# 3. Identificar as 5 maiores comunidades
+top5_comunidades_fev = centralidade_fev_df['Comunidade'].value_counts().head(5).index
+
+# 4. Selecionar os 2 ativos mais centrais (maior grau) de cada comunidade
+carteira_exp_fev = []
+
+for comunidade in top5_comunidades_fev:
+    subgrupo = centralidade_fev_df[centralidade_fev_df['Comunidade'] == comunidade]
+    top2 = subgrupo.sort_values(by='Grau', ascending=False).head(2)
+    carteira_exp_fev.extend(top2['Ativo'].tolist())
+
+# 5. Exibir a carteira
+print("Carteira Experimental (fevereiro – 2 ativos por comunidade):")
+print(carteira_exp_fev)
+
+
+ativos_escolhidos_fev = ['LOGG3.SA', 'PTBL3.SA', 'GEPA3.SA', 'BRSR5.SA', 'MRSA6B.SA', 'BGIP4.SA', 'CYRE3.SA', 'ALLD3.SA', 'TASA3.SA', 'TAEE4.SA']
+
+# Filtrar apenas os ativos da carteira
+# Corrigido o final do intervalo de datas para 2024-02-29
+precos_carteira_fev = fechamento_ajustado_fev[ativos_escolhidos_fev].loc['2024-02-01':'2024-02-29']
+
+# Normalizar os preços (base 100 no início)
+precos_normalizados_fev = precos_carteira_fev / precos_carteira_fev.iloc[0] * 100
+
+# Criar a série da carteira como a média dos ativos
+precos_normalizados_fev['Carteira'] = precos_normalizados_fev.mean(axis=1)
+
+# 5. Criar a tabela final com os ativos escolhidos
+tabela_resultado_fev = centralidade_fev_df[centralidade_fev_df['Ativo'].isin(carteira_exp_fev)].sort_values(by='Comunidade')
+
+# 6. Exibir resultado
+print("Tabela com os 10 ativos escolhidos (2 por comunidade):")
+print(tabela_resultado_fev)
+
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(12, 6))
+
+# Plotar cada ativo individualmente (com transparência)
+for ativo in precos_normalizados_fev.columns[:-1]:
+    plt.plot(precos_normalizados_fev.index, precos_normalizados_fev[ativo], label=ativo, alpha=0.3)
+
+# Plotar a Carteira Experimental em vermelho com linha tracejada
+plt.plot(precos_normalizados_fev.index,
+         precos_normalizados_fev['Carteira'],
+         label='Carteira Experimental',
+         linewidth=2.5,
+         linestyle='--',
+         color='red')
+
+# Personalização
+plt.title('')
+plt.xlabel('Data')
+plt.ylabel('Preço Normalizado (base 100)')
+plt.grid(True, linestyle='--', alpha=0.6)
+plt.legend(loc='upper left', fontsize=9)
+plt.tight_layout()
+plt.show()
