@@ -1,0 +1,94 @@
+#JANEIRO
+# Extrair apenas os preços de fechamento ajustado
+fechamento_ajustado = dados.xs('Close', axis=1, level=1)
+
+# Ordenar por data
+fechamento_ajustado = fechamento_ajustado.sort_index() 
+
+import numpy as np
+
+retornos_log_ajustado = np.log(fechamento_ajustado / fechamento_ajustado.shift(1))
+
+jan_ajustado = retornos_log_ajustado.loc['2024-01-01':'2024-01-31']
+
+# Número de colunas antes de qualquer remoção
+total_inicial = jan_ajustado.shape[1]
+
+# Remover colunas completamente nulas
+jan_ajustado = jan_ajustado.dropna(axis=1, how='all')
+apos_remover_todas_nulas = jan_ajustado.shape[1]
+print(f"Removidos (todos nulos): {total_inicial - apos_remover_todas_nulas}")
+
+# Remover colunas com menos de 15 dias de dados
+jan_ajustado = jan_ajustado.dropna(axis=1, thresh=15)
+apos_filtrar_thresh15 = jan_ajustado.shape[1]
+print(f"Removidos (<15 dias): {apos_remover_todas_nulas - apos_filtrar_thresh15}")
+
+# Preencher valores faltantes e remover linhas com NA restantes
+linhas_antes = jan_ajustado.shape[0]
+jan_ajustado = jan_ajustado.ffill().dropna()
+linhas_depois = jan_ajustado.shape[0]
+print(f"Linhas removidas após ffill e dropna(): {linhas_antes - linhas_depois}")
+
+
+import matplotlib.pyplot as plt
+
+# Plotar todos os retornos do mês de janeiro
+plt.figure(figsize=(15, 6))
+for coluna in jan_ajustado.columns:
+    plt.plot(jan_ajustado.index, jan_ajustado[coluna], linewidth=0.7)
+
+plt.title('Retornos Logarítmicos Diários dos Ativos - Janeiro de 2024')
+plt.xlabel('Data')
+plt.ylabel('Retorno Logarítmico')
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+
+#FEVEREIRO
+
+# Extrair apenas os preços de fechamento ajustado
+fechamento_ajustado_fev = dados.xs('Close', axis=1, level=1)
+
+# Ordenar por data
+fechamento_ajustado_fev = fechamento_ajustado_fev.sort_index()
+
+import numpy as np
+
+retornos_log_ajustado_fev = np.log(fechamento_ajustado_fev / fechamento_ajustado_fev.shift(1))
+
+fev_ajustado = retornos_log_ajustado_fev.loc['2024-02-01':'2024-02-29']
+
+ Número de colunas antes de qualquer remoção
+total_inicial = fev_ajustado.shape[1]
+
+# Remover colunas completamente nulas
+fev_ajustado = fev_ajustado.dropna(axis=1, how='all')
+apos_remover_todas_nulas = fev_ajustado.shape[1]
+print(f"Removidos (todos nulos): {total_inicial - apos_remover_todas_nulas}")
+
+# Remover colunas com menos de 15 dias de dados
+fev_ajustado = fev_ajustado.dropna(axis=1, thresh=15)
+apos_filtrar_thresh15 = fev_ajustado.shape[1]
+print(f"Removidos (<15 dias): {apos_remover_todas_nulas - apos_filtrar_thresh15}")
+
+# Preencher valores faltantes e remover linhas com NA restantes
+linhas_antes = fev_ajustado.shape[0]
+fev_ajustado = fev_ajustado.ffill().dropna()
+linhas_depois = fev_ajustado.shape[0]
+print(f"Linhas removidas após ffill e dropna(): {linhas_antes - linhas_depois}")
+
+import matplotlib.pyplot as plt
+
+# Plotar todos os retornos do mês de Fevereiro
+plt.figure(figsize=(15, 6))
+for coluna in fev_ajustado.columns:
+    plt.plot(fev_ajustado.index, fev_ajustado[coluna], linewidth=0.7)
+
+plt.title('')
+plt.xlabel('Data')
+plt.ylabel('Retorno Logarítmico')
+plt.grid(True)
+plt.tight_layout()
+plt.show()
