@@ -40,7 +40,7 @@ Seleciona os dois ativos com maior centralidade de grau dentro das cinco maiores
 
 ---
 
-### `5-avaliacao-carteiras-benchmark-jan-fev-2024`  
+### `6-avaliacao-carteiras-benchmark-jan-fev-2024`  
 Compara o desempenho das carteiras experimentais frente a benchmarks do mercado (IBOV, Small Caps, Dividendos). Calcula retorno total, volatilidade anualizada e índice de Sharpe, com visualizações comparativas dos preços normalizados.
 
 ---
