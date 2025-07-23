@@ -1,6 +1,6 @@
 # Redes Complexas Aplicadas ao Mercado Financeiro Brasileiro
 
-Este repositório contém o código, análises e resultados do (TCC)  **"Redes Complexas Aplicadas ao Mercado Financeiro Brasileiro"**.  
+Este repositório contém o código em Python do (TCC)  **"Redes Complexas Aplicadas ao Mercado Financeiro Brasileiro"**.  
 O objetivo principal do estudo é aplicar técnicas de redes complexas para investigar a estrutura de interdependência entre ativos da bolsa brasileira (B3) ao longo de diferentes períodos. Utilizando dados financeiros reais, o trabalho realiza:
 
 - Redução de dimensionalidade com Análise de Componentes Principais (PCA)  
