@@ -1,0 +1,170 @@
+#JANEIRO
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+# Padronização
+scaler = StandardScaler()
+jan_std = scaler.fit_transform(jan_ajustado)
+
+# PCA
+pca = PCA()
+pca_result = pca.fit(jan_std)
+
+# Variância explicada
+import pandas as pd
+
+variancia = pca.explained_variance_ratio_
+variancia_acumulada = np.cumsum(variancia)
+
+pca_variancia_df = pd.DataFrame({
+    "Componente": [f"PC{i+1}" for i in range(len(variancia))],
+    "Variância Explicada": variancia,
+    "Acumulada": variancia_acumulada
+})
+print(pca_variancia_df)
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Variância explicada pelos componentes principais
+variancia_explicada = np.array([
+    0.2138239, 0.06991203, 0.05776007, 0.05707553, 0.05547334,
+    0.05084912, 0.05003213, 0.04625330, 0.04532719, 0.04232054,
+    0.04207837, 0.04096582, 0.03578593, 0.03514761, 0.03484288,
+    0.03314676, 0.03212020, 0.02900731, 0.02807798, 4.734674e-33
+])
+
+# Índices dos componentes (1 a 20)
+componentes = np.arange(1, len(variancia_explicada) + 1)
+
+# Plot do gráfico de cotovelo
+plt.figure(figsize=(8, 5))
+plt.plot(componentes, variancia_explicada * 100, marker='o', linestyle='-')
+plt.title('Gráfico de Cotovelo - Variância Explicada por Componente')
+plt.xlabel('Componente Principal')
+plt.ylabel('Variância Explicada (%)')
+plt.grid(True)
+plt.xticks(componentes)
+plt.tight_layout()
+plt.show()
+
+import numpy as np
+import pandas as pd
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+import seaborn as sns
+import networkx as nx
+
+
+
+# 2. Aplicar PCA
+pca = PCA()
+pca_scores = pca.fit_transform(jan_ajustado.T)  # Transposto para PCs por ativo
+
+# 3. Selecionar os primeiros 6 PCs
+num_pcs = 6
+pca_df = pd.DataFrame(pca_scores[:, :num_pcs], index=jan_ajustado.columns)
+
+# 4. Calcular correlação entre ativos nos PCs selecionados
+correlation_matrix = pca_df.T.corr()
+
+# 5. Construir a rede com threshold
+limiar = 0.7
+G = nx.Graph()
+
+for ativo in correlation_matrix.columns:
+    G.add_node(ativo)
+
+for i in correlation_matrix.columns:
+    for j in correlation_matrix.columns:
+        if i != j and correlation_matrix.loc[i, j] >= limiar:
+            G.add_edge(i, j, weight=correlation_matrix.loc[i, j])
+
+# Mostrar número de nós e arestas
+print("Nós na rede:", G.number_of_nodes())
+print("Arestas na rede:", G.number_of_edges())
+print(pca_df)
+
+
+#FEVEREIRO
+
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+# Padronização
+scaler = StandardScaler()
+fev_std = scaler.fit_transform(fev_ajustado)
+
+# PCA
+pca = PCA()
+pca_result = pca.fit(fev_std)
+
+# Variância explicada
+import pandas as pd
+
+variancia = pca.explained_variance_ratio_
+variancia_acumulada = np.cumsum(variancia)
+
+pca_variancia_df = pd.DataFrame({
+    "Componente": [f"PC{i+1}" for i in range(len(variancia))],
+    "Variância Explicada": variancia,
+    "Acumulada": variancia_acumulada
+})
+print(pca_variancia_df)
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Variância explicada pelos componentes principais (valores reais fornecidos)
+variancia_explicada = np.array([
+    0.2287354, 0.07287083, 0.06789241, 0.06605465, 0.06083038,
+    0.05655067, 0.05466469, 0.05198175, 0.05171435, 0.04935416,
+    0.04691261, 0.04652870, 0.04147269, 0.03981986, 0.03370595,
+    0.03091088, 8.873915e-33
+])
+
+# Índices dos componentes principais (1 a 17)
+componentes = np.arange(1, len(variancia_explicada) + 1)
+
+# Plot do gráfico de cotovelo
+plt.figure(figsize=(8, 5))
+plt.plot(componentes, variancia_explicada * 100, marker='o', linestyle='-')
+plt.title('')
+plt.xlabel('Componente Principal')
+plt.ylabel('Variância Explicada (%)')
+plt.xticks(componentes)
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+import networkx as nx
+
+# Aplicar novamente o PCA (para obter scores dos ativos transpostos)
+pca = PCA()
+pca_scores_fev = pca.fit_transform(fev_ajustado.T)  # Transposto para PCs por ativo
+
+# Selecionar os 6 primeiros PCs
+num_pcs = 6
+pca_df_fev = pd.DataFrame(pca_scores_fev[:, :num_pcs], index=fev_ajustado.columns)
+
+# Matriz de correlação entre ativos com base nos PCs
+correlation_matrix_fev = pca_df_fev.T.corr()
+
+# Construir a rede com threshold
+limiar = 0.7
+G_fev = nx.Graph()
+
+# Adicionar nós
+for ativo in correlation_matrix_fev.columns:
+    G_fev.add_node(ativo)
+
+# Adicionar arestas com correlação >= limiar
+for i in correlation_matrix_fev.columns:
+    for j in correlation_matrix_fev.columns:
+        if i != j and correlation_matrix_fev.loc[i, j] >= limiar:
+            G_fev.add_edge(i, j, weight=correlation_matrix_fev.loc[i, j])
+
+# Resultados
+print("Nós na rede:", G_fev.number_of_nodes())
+print("Arestas na rede:", G_fev.number_of_edges())
+print(pca_df_fev)
